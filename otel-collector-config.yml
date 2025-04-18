@@ -7,17 +7,41 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
 
+processors:
+  batch:
+
 exporters:
-  otlp:
+  otlp/jaeger:
     endpoint: jaeger:4317
     tls:
       insecure: true
 
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+  otlp/prometheus:
+    endpoint: prometheus:8889
+
+  otlp/loki:
+    endpoint: loki:3100
+
 service:
   pipelines:
     traces:
-      receivers: [otlp]
-      exporters: [otlp]
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp/jaeger, otlp/tempo ]
 
+    metrics:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp/prometheus ]
+
+    logs:
+      receivers: [ otlp ]
+      processors: [ batch ]
+      exporters: [ otlp/loki ]
 
 
